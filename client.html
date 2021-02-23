@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <form action=/cgi-bin/add.cgi onSubmit="return false">
+            <p>Адрес сервера:</p>
+            <p><input type="text" name="addres" placeholder="111.1.1.1:1111" pattern="\d{3}\.\d\.\d\.\d:\d{4}" autocomplete="off"></p>
+            <p>Имя пользователя:</p>
+            <p><input type="text" name="username" placeholder="Username" autocomplete="off"></p>
+            <p><button onClick="validForm(this.form)">Подключиться</button></p>
+        </form>
+    </body>
+    <script>
+        function validForm(f) {
+            addres = f.addres.value; // адрес сервера в строковом виде
+            username = f.username.value; //имя пользователя в строковом виде
+            if(addres == "" || username == "") alert("Не все поля формы заполнены.") // Выводим предупреждение
+            else {
+                var request = new XMLHttpRequest();
+                request.open("GET", "http://localhost:8080/check-name?username="+username, false);
+                request.send();
+                if(request.status != 200)
+                    alert("Имя пользователя занято, попробуйте другое");
+                else{
+                    localStorage.setItem('username', username)
+                    window.location = "Messenger.html";
+                }
+            }
+        }
+    </script>
+</html>
