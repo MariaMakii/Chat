@@ -1,0 +1,47 @@
+<html>
+    <head>
+    
+    </head>
+    <body>
+        <form action=/cgi-bin/add.cgi onSubmit="return false" name='messenger'>
+            <p><textarea rows="10" cols="45" name="chat" readonly></textarea></p>
+            <p><input type="text" name="message" placeholder="Message" autocomplete="off"></p>
+            <button onClick="validForm(this.form)">Отправить</button>
+            <button>Отключиться</button>
+        </form>
+    </body>
+    <script>
+        var textarea = document.forms.messenger.chat;
+        setInterval(function(){
+            textarea.scrollTop = textarea.scrollHeight;
+        }, 1000);
+        var username = localStorage['username'];
+        localStorage.removeItem( 'username' );
+        new EventSource("http://localhost:8080/sse").addEventListener( "message", msg =>{console.log(msg.data); document.forms.messenger.chat.value += JSON.parse(msg.data).sender+": "+JSON.parse(msg.data).text + "\n";});
+        function reqReadyStateChange(request) {
+            if (request.readyState == 4) {
+                var status = request.status;
+                if (status == 200) document.getElementById("output").innerHTML = request.responseText;
+            }
+        }
+        function validForm(f) {
+            message = f.message.value; // сообщение в строковом виде
+            f.message.value = "";
+            if (message == "" ) alert ("Сообщение не введено.") // Выводим предупреждение
+            else {
+                var request = new XMLHttpRequest();
+                var date = new Date();
+                var date = new Date();
+                let d = {
+                text : message.toString(),
+                time: date.getHours().toString() + ":" + date.getMinutes().toString(),
+                date: date.getDate().toString() + "/" + date.getMonth().toString() + "/" + date.getFullYear().toString(),
+                sender: username
+                };
+                request.open("POST", "http://localhost:8080/send-message");
+                request.onreadystatechange = reqReadyStateChange(request);
+                request.send(JSON.stringify(d));
+            }
+        }
+    </script>
+</html>
